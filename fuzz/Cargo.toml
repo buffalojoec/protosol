@@ -1,0 +1,21 @@
+[package]
+name = "protosol-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.protosol]
+path = ".."
+
+[[bin]]
+name = "agave"
+path = "fuzz_targets/agave.rs"
+test = false
+doc = false
+bench = false
