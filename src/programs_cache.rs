@@ -79,7 +79,10 @@ static AGAVE_BUILTINS: &[Builtin] = &[
 ];
 
 /// Get the program account for a specified builtin.
-pub fn program_account(program_id: &Pubkey, rent: &Rent) -> Vec<(Pubkey, AccountSharedData)> {
+pub fn builtin_program_account(
+    program_id: &Pubkey,
+    rent: &Rent,
+) -> Vec<(Pubkey, AccountSharedData)> {
     let data = AGAVE_BUILTINS
         .iter()
         .find(|Builtin { program_id: id, .. }| id == program_id)

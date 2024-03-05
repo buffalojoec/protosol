@@ -46,7 +46,7 @@ pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
     let sysvar_cache: SysvarCache = sysvar_context.into();
     let mut timings = ExecuteTimings::default();
 
-    let program_accounts = programs_cache::program_account(&program_id, &rent);
+    let program_accounts = programs_cache::builtin_program_account(&program_id, &rent);
     let program_accounts_len = program_accounts.len(); // Single account for builtin
     let program_indices = &[0];
 
