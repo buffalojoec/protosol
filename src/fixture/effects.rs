@@ -6,6 +6,7 @@ use {
 };
 
 /// Represents the effects of a single instruction.
+#[derive(Clone, Debug, PartialEq)]
 pub struct FixtureEffects {
     /// The result of the instruction.
     pub result: i32,

@@ -19,12 +19,12 @@ use {
         program_error::ProgramError,
         transaction_context::{InstructionAccount, TransactionContext},
     },
-    std::sync::Arc,
+    std::{collections::HashMap, sync::Arc},
 };
 
 /// Process a fixture using the simulated Solana program runtime.
 pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
-    let Fixture { input, .. } = fixture;
+    let Fixture { input, output } = fixture;
     let FixtureContext {
         program_id,
         loader_id: _, // Unused at the moment
@@ -34,6 +34,10 @@ pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
         instruction_accounts: account_metas,
         instruction_data,
     } = input;
+    let FixtureEffects {
+        modified_accounts: expected_modified_accounts,
+        ..
+    } = output;
 
     let compute_budget = ComputeBudget::default();
     let mut compute_units_consumed = 0;
@@ -112,12 +116,17 @@ pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
         }
     };
 
+    let expected_modified_accounts = expected_modified_accounts
+        .into_iter()
+        .collect::<HashMap<_, _>>();
+
     let modified_accounts = transaction_context
         .deconstruct_without_keys()
         .unwrap()
         .into_iter()
         .skip(program_accounts_len)
         .zip(account_metas.iter().map(|meta| meta.pubkey))
+        .filter(|(_, key)| expected_modified_accounts.contains_key(key))
         .map(|(account, key)| (key, account))
         .collect::<Vec<_>>();
 
