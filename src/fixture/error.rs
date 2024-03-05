@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum FixtureError {
     #[error("Invalid protobuf")]
     InvalidProtobuf(#[from] prost::DecodeError),

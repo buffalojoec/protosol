@@ -110,7 +110,7 @@ impl From<proto::StakeHistory> for StakeHistory {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct FixtureSysvarContext {
     pub clock: Clock,
     pub epoch_rewards: EpochRewards,
@@ -161,5 +161,195 @@ impl From<FixtureSysvarContext> for SysvarCache {
         sysvar_cache.set_slot_hashes(slot_hashes);
         sysvar_cache.set_stake_history(stake_history);
         sysvar_cache
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_proto_clock() {
+        let input = proto::Clock {
+            slot: 42,
+            epoch_start_timestamp: 1_000_000,
+            epoch: 1,
+            leader_schedule_epoch: 1,
+            unix_timestamp: 1_000_000,
+        };
+        let clock = Clock::from(input);
+        assert_eq!(clock.slot, 42);
+        assert_eq!(clock.epoch_start_timestamp, 1_000_000);
+        assert_eq!(clock.epoch, 1);
+        assert_eq!(clock.leader_schedule_epoch, 1);
+        assert_eq!(clock.unix_timestamp, 1_000_000);
+    }
+
+    #[test]
+    fn test_from_proto_epoch_rewards() {
+        let input = proto::EpochRewards {
+            total_rewards: 42,
+            distributed_rewards: 42,
+            distribution_complete_block_height: 42,
+        };
+        let epoch_rewards = EpochRewards::from(input);
+        assert_eq!(epoch_rewards.total_rewards, 42);
+        assert_eq!(epoch_rewards.distributed_rewards, 42);
+        assert_eq!(epoch_rewards.distribution_complete_block_height, 42);
+    }
+
+    #[test]
+    fn test_from_proto_epoch_schedule() {
+        let input = proto::EpochSchedule {
+            slots_per_epoch: 42,
+            leader_schedule_slot_offset: 42,
+            warmup: false,
+            first_normal_epoch: 42,
+            first_normal_slot: 42,
+        };
+        let epoch_schedule = EpochSchedule::from(input);
+        assert_eq!(epoch_schedule.slots_per_epoch, 42);
+        assert_eq!(epoch_schedule.leader_schedule_slot_offset, 42);
+        assert!(!epoch_schedule.warmup);
+        assert_eq!(epoch_schedule.first_normal_epoch, 42);
+        assert_eq!(epoch_schedule.first_normal_slot, 42);
+    }
+
+    #[test]
+    fn test_try_from_proto_rent() {
+        let input = proto::Rent {
+            lamports_per_byte_year: 42,
+            exemption_threshold: 42.0,
+            burn_percent: 42,
+        };
+        let rent = Rent::try_from(input).unwrap();
+        assert_eq!(rent.lamports_per_byte_year, 42);
+        assert_eq!(rent.exemption_threshold, 42.0);
+        assert_eq!(rent.burn_percent, 42);
+
+        // Fail integer out of range
+        let input = proto::Rent {
+            lamports_per_byte_year: 42,
+            exemption_threshold: 42.0,
+            burn_percent: 256,
+        };
+        assert_eq!(
+            Rent::try_from(input).unwrap_err(),
+            FixtureError::IntegerOutOfRange
+        );
+    }
+
+    #[test]
+    fn test_try_from_proto_slot_hash_entry() {
+        let input = proto::SlotHashEntry {
+            slot: 42,
+            hash: vec![0; 32],
+        };
+        let slot_hash = SlotHash::try_from(input).unwrap();
+        assert_eq!(slot_hash.0, 42);
+        assert_eq!(slot_hash.1, Hash::default());
+
+        // Fail invalid hash bytes
+        let input = proto::SlotHashEntry {
+            slot: 42,
+            hash: vec![0; 31],
+        };
+        assert_eq!(
+            SlotHash::try_from(input).unwrap_err(),
+            FixtureError::InvalidHashBytes
+        );
+    }
+
+    #[test]
+    fn test_try_from_proto_slot_hashes() {
+        let input = proto::SlotHashes {
+            slot_hashes: vec![proto::SlotHashEntry {
+                slot: 42,
+                hash: vec![0; 32],
+            }],
+        };
+        let slot_hashes = SlotHashes::try_from(input).unwrap();
+        assert_eq!(slot_hashes.len(), 1);
+        assert_eq!(slot_hashes.get(&42), Some(&Hash::default()));
+    }
+
+    #[test]
+    fn test_from_proto_stake_history_entry() {
+        let input = proto::StakeHistoryEntry {
+            epoch: 42,
+            effective: 42,
+            activating: 42,
+            deactivating: 42,
+        };
+        let (epoch, entry) = <(u64, StakeHistoryEntry)>::from(input);
+        assert_eq!(epoch, 42);
+        assert_eq!(entry.effective, 42);
+        assert_eq!(entry.activating, 42);
+        assert_eq!(entry.deactivating, 42);
+    }
+
+    #[test]
+    fn test_from_proto_stake_history() {
+        let input = proto::StakeHistory {
+            stake_history: vec![proto::StakeHistoryEntry {
+                epoch: 42,
+                effective: 42,
+                activating: 42,
+                deactivating: 42,
+            }],
+        };
+        let stake_history = StakeHistory::from(input);
+        assert_eq!(stake_history.get(42).unwrap().effective, 42);
+    }
+
+    #[test]
+    fn test_try_from_proto_sysvar_context() {
+        let input = proto::SysvarContext {
+            clock: Some(proto::Clock {
+                slot: 42,
+                epoch_start_timestamp: 1_000_000,
+                epoch: 1,
+                leader_schedule_epoch: 1,
+                unix_timestamp: 1_000_000,
+            }),
+            epoch_rewards: Some(proto::EpochRewards {
+                total_rewards: 42,
+                distributed_rewards: 42,
+                distribution_complete_block_height: 42,
+            }),
+            epoch_schedule: Some(proto::EpochSchedule {
+                slots_per_epoch: 42,
+                leader_schedule_slot_offset: 42,
+                warmup: false,
+                first_normal_epoch: 42,
+                first_normal_slot: 42,
+            }),
+            rent: Some(proto::Rent {
+                lamports_per_byte_year: 42,
+                exemption_threshold: 42.0,
+                burn_percent: 42,
+            }),
+            slot_hashes: Some(proto::SlotHashes {
+                slot_hashes: vec![proto::SlotHashEntry {
+                    slot: 42,
+                    hash: vec![0; 32],
+                }],
+            }),
+            stake_history: Some(proto::StakeHistory {
+                stake_history: vec![proto::StakeHistoryEntry {
+                    epoch: 42,
+                    effective: 42,
+                    activating: 42,
+                    deactivating: 42,
+                }],
+            }),
+        };
+        let sysvar_context = FixtureSysvarContext::try_from(input).unwrap();
+        assert_eq!(sysvar_context.clock.slot, 42);
+        assert_eq!(sysvar_context.epoch_rewards.total_rewards, 42);
+        assert_eq!(sysvar_context.epoch_schedule.slots_per_epoch, 42);
+        assert_eq!(sysvar_context.rent.lamports_per_byte_year, 42);
+        assert_eq!(sysvar_context.slot_hashes.get(&42), Some(&Hash::default()));
+        assert_eq!(sysvar_context.stake_history.get(42).unwrap().effective, 42);
     }
 }

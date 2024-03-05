@@ -91,3 +91,38 @@ impl From<proto::FeatureSet> for FeatureSet {
         feature_set
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_proto_feature_set() {
+        let try_conversion = |feature_ids: &[Pubkey]| {
+            let features = feature_ids
+                .iter()
+                .map(|id| u64::from_le_bytes(id.to_bytes()[..8].try_into().unwrap()))
+                .collect::<Vec<_>>();
+
+            FeatureSet::from(proto::FeatureSet { features })
+        };
+
+        // Success
+        let features = &AGAVE_FEATURES[..10];
+        let feature_set = try_conversion(features);
+        for feature in features {
+            assert!(feature_set.is_active(feature));
+        }
+
+        // Not valid features (not in the list)
+        let features = &[
+            Pubkey::new_unique(),
+            Pubkey::new_unique(),
+            Pubkey::new_unique(),
+        ];
+        let feature_set = try_conversion(features);
+        for feature in features {
+            assert!(!feature_set.is_active(feature));
+        }
+    }
+}
