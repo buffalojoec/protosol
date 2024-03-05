@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cargo build
-cargo build-sbf --manifest-path ./test-program/Cargo.toml
-cargo test --manifest-path ./test-program/Cargo.toml
