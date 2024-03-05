@@ -46,6 +46,28 @@ impl TryFrom<proto::AcctState> for (Pubkey, AccountSharedData) {
     }
 }
 
+impl From<(Pubkey, AccountSharedData)> for proto::AcctState {
+    fn from(input: (Pubkey, AccountSharedData)) -> Self {
+        let (pubkey, account) = input;
+        let Account {
+            owner,
+            lamports,
+            data,
+            executable,
+            rent_epoch,
+        } = account.into();
+
+        proto::AcctState {
+            address: pubkey.to_bytes().to_vec(),
+            owner: owner.to_bytes().to_vec(),
+            lamports,
+            data,
+            executable,
+            rent_epoch,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

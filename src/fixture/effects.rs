@@ -39,6 +39,27 @@ impl TryFrom<proto::InstrEffects> for FixtureEffects {
     }
 }
 
+impl From<FixtureEffects> for proto::InstrEffects {
+    fn from(input: FixtureEffects) -> Self {
+        let FixtureEffects {
+            result,
+            custom_error: custom_err,
+            modified_accounts,
+        } = input;
+
+        let modified_accounts = modified_accounts
+            .into_iter()
+            .map(|(pubkey, account)| (pubkey, account).into())
+            .collect();
+
+        proto::InstrEffects {
+            result,
+            custom_err,
+            modified_accounts,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use {super::*, solana_sdk::account::Account};
