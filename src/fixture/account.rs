@@ -1,3 +1,6 @@
+//! An account with an address, in the form of a `(Pubkey, AccountSharedData)`
+//! tuple from the Solana SDK.
+
 use {
     super::{error::FixtureError, proto},
     solana_sdk::{
@@ -10,28 +13,36 @@ impl TryFrom<proto::AcctState> for (Pubkey, AccountSharedData) {
     type Error = FixtureError;
 
     fn try_from(input: proto::AcctState) -> Result<Self, Self::Error> {
+        let proto::AcctState {
+            address,
+            owner,
+            lamports,
+            data,
+            executable,
+            rent_epoch,
+        } = input;
+
         let pubkey = Pubkey::new_from_array(
-            input
-                .address
+            address
                 .try_into()
                 .map_err(|_| FixtureError::InvalidPubkeyBytes)?,
         );
         let owner = Pubkey::new_from_array(
-            input
-                .owner
+            owner
                 .try_into()
                 .map_err(|_| FixtureError::InvalidPubkeyBytes)?,
         );
 
-        let account = AccountSharedData::from(Account {
-            lamports: input.lamports,
-            data: input.data,
-            owner,
-            executable: input.executable,
-            rent_epoch: input.rent_epoch,
-        });
-
-        Ok((pubkey, account))
+        Ok((
+            pubkey,
+            AccountSharedData::from(Account {
+                lamports,
+                data,
+                owner,
+                executable,
+                rent_epoch,
+            }),
+        ))
     }
 }
 

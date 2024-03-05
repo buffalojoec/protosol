@@ -1,3 +1,5 @@
+//! Solana runtime sysvars, as represented in the Solana SDK.
+
 use {
     super::{error::FixtureError, proto},
     solana_program_runtime::sysvar_cache::SysvarCache,
@@ -11,6 +13,23 @@ use {
         stake_history::{StakeHistory, StakeHistoryEntry},
     },
 };
+
+/// A fixture containing the Solana runtime sysvars.
+#[derive(Debug, Default)]
+pub struct FixtureSysvarContext {
+    /// `Clock` sysvar.
+    pub clock: Clock,
+    /// `EpochRewards` sysvar.
+    pub epoch_rewards: EpochRewards,
+    /// `EpochSchedule` sysvar.
+    pub epoch_schedule: EpochSchedule,
+    /// `Rent` sysvar.
+    pub rent: Rent,
+    /// `SlotHashes` sysvar.
+    pub slot_hashes: SlotHashes,
+    /// `StakeHistory` sysvar.
+    pub stake_history: StakeHistory,
+}
 
 impl From<proto::Clock> for Clock {
     fn from(input: proto::Clock) -> Self {
@@ -108,16 +127,6 @@ impl From<proto::StakeHistory> for StakeHistory {
         }
         stake_history
     }
-}
-
-#[derive(Debug, Default)]
-pub struct FixtureSysvarContext {
-    pub clock: Clock,
-    pub epoch_rewards: EpochRewards,
-    pub epoch_schedule: EpochSchedule,
-    pub rent: Rent,
-    pub slot_hashes: SlotHashes,
-    pub stake_history: StakeHistory,
 }
 
 impl TryFrom<proto::SysvarContext> for FixtureSysvarContext {

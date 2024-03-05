@@ -1,10 +1,6 @@
 use {
-    protosol::{
-        fixture::{
-            context::FixtureContext, effects::FixtureEffects, sysvars::FixtureSysvarContext,
-            Fixture,
-        },
-        program_runtime,
+    protosol::fixture::{
+        context::FixtureContext, effects::FixtureEffects, sysvars::FixtureSysvarContext, Fixture,
     },
     solana_sdk::{
         account::{Account, AccountSharedData},
@@ -85,5 +81,5 @@ fn test_process_instruction_fixture() {
 
     let elf = get_test_elf();
 
-    program_runtime::agave::process_fixture(fixture, elf);
+    protosol::program_runtime::process_fixture(fixture, elf);
 }

@@ -1,11 +1,17 @@
+//! Effects of a single instruction.
+
 use {
     super::{error::FixtureError, proto},
     solana_sdk::{account::AccountSharedData, pubkey::Pubkey},
 };
 
+/// Represents the effects of a single instruction.
 pub struct FixtureEffects {
+    /// The result of the instruction.
     pub result: i32,
+    /// The custom error of the instruction, if any.
     pub custom_error: u64,
+    /// Resulting accounts with state, to be checked post-simulation.
     pub modified_accounts: Vec<(Pubkey, AccountSharedData)>,
 }
 
@@ -13,14 +19,21 @@ impl TryFrom<proto::InstrEffects> for FixtureEffects {
     type Error = FixtureError;
 
     fn try_from(input: proto::InstrEffects) -> Result<Self, Self::Error> {
+        let proto::InstrEffects {
+            result,
+            custom_err: custom_error,
+            modified_accounts,
+        } = input;
+
+        let modified_accounts = modified_accounts
+            .into_iter()
+            .map(|acct_state| acct_state.try_into())
+            .collect::<Result<Vec<_>, _>>()?;
+
         Ok(Self {
-            result: input.result,
-            custom_error: input.custom_err,
-            modified_accounts: input
-                .modified_accounts
-                .into_iter()
-                .map(|acct_state| acct_state.try_into())
-                .collect::<Result<Vec<_>, _>>()?,
+            result,
+            custom_error,
+            modified_accounts,
         })
     }
 }

@@ -1,3 +1,6 @@
+//! A fixture for invoking a single instruction against a simulated Solana
+//! program runtime environment, for a given program.
+
 pub mod account;
 pub mod context;
 pub mod effects;
@@ -10,8 +13,12 @@ pub mod sysvars;
 
 use {context::FixtureContext, effects::FixtureEffects, error::FixtureError, prost::Message};
 
+/// A fixture for invoking a single instruction against a simulated Solana
+/// program runtime environment, for a given program.
 pub struct Fixture {
+    /// The fixture inputs.
     pub input: FixtureContext,
+    /// The fixture outputs.
     pub output: FixtureEffects,
 }
 
@@ -33,6 +40,7 @@ impl TryFrom<proto::InstrFixture> for Fixture {
 }
 
 impl Fixture {
+    /// Decode a `Protobuf` blob into a `Fixture`.
     pub fn decode(blob: &[u8]) -> Result<Self, FixtureError> {
         let fixture: proto::InstrFixture = proto::InstrFixture::decode(blob)?;
         fixture.try_into()

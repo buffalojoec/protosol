@@ -1,3 +1,5 @@
+//! A Solana runtime feature set, as represented in the Solana SDK.
+
 use {
     super::proto,
     solana_sdk::{feature_set::*, pubkey::Pubkey},

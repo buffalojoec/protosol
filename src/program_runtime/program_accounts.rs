@@ -1,3 +1,5 @@
+//! Program accounts.
+
 use solana_sdk::{
     account::{Account, AccountSharedData},
     bpf_loader_upgradeable::UpgradeableLoaderState,
@@ -5,6 +7,7 @@ use solana_sdk::{
     rent::Rent,
 };
 
+/// Create the program accounts for a given program.
 pub fn program_accounts(
     program_id: &Pubkey,
     loader_id: &Pubkey,

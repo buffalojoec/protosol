@@ -1,3 +1,6 @@
+//! Instruction context fixture for invoking programs in a simulated program
+//! runtime environment.
+
 use {
     super::{error::FixtureError, proto, sysvars::FixtureSysvarContext},
     solana_sdk::{
@@ -6,14 +9,22 @@ use {
     },
 };
 
+/// Instruction context fixture.
 #[derive(Debug)]
 pub struct FixtureContext {
+    /// The program ID of the program being invoked.
     pub program_id: Pubkey,
+    /// The loader ID to use for the program.
     pub loader_id: Pubkey,
+    /// The feature set to use for the simulation.
     pub feature_set: FeatureSet,
+    /// The sysvar context to use for the simulation.
     pub sysvar_context: FixtureSysvarContext,
+    /// Input accounts with state.
     pub accounts: Vec<(Pubkey, AccountSharedData)>,
+    /// Accounts to pass to the instruction.
     pub instruction_accounts: Vec<AccountMeta>,
+    /// The instruction data.
     pub instruction_data: Vec<u8>,
 }
 
@@ -21,35 +32,40 @@ impl TryFrom<proto::InstrContext> for FixtureContext {
     type Error = FixtureError;
 
     fn try_from(input: proto::InstrContext) -> Result<Self, Self::Error> {
+        let proto::InstrContext {
+            program_id,
+            loader_id,
+            feature_set,
+            sysvars,
+            accounts,
+            instr_accounts,
+            data: instruction_data,
+        } = input;
+
         let program_id = Pubkey::new_from_array(
-            input
-                .program_id
+            program_id
                 .try_into()
                 .map_err(|_| FixtureError::InvalidPubkeyBytes)?,
         );
         let loader_id = Pubkey::new_from_array(
-            input
-                .loader_id
+            loader_id
                 .try_into()
                 .map_err(|_| FixtureError::InvalidPubkeyBytes)?,
         );
 
-        let feature_set = input.feature_set.map(|fs| fs.into()).unwrap_or_default();
+        let feature_set = feature_set.map(|fs| fs.into()).unwrap_or_default();
 
-        let sysvar_context = input
-            .sysvars
+        let sysvar_context = sysvars
             .map(|sysvars| sysvars.try_into())
             .transpose()?
             .unwrap_or_default();
 
-        let accounts = input
-            .accounts
+        let accounts = accounts
             .into_iter()
             .map(|acct_state| acct_state.try_into())
             .collect::<Result<Vec<_>, _>>()?;
 
-        let instruction_accounts = input
-            .instr_accounts
+        let instruction_accounts = instr_accounts
             .into_iter()
             .map(
                 |proto::InstrAcct {
@@ -68,8 +84,6 @@ impl TryFrom<proto::InstrContext> for FixtureContext {
                 },
             )
             .collect::<Result<Vec<_>, _>>()?;
-
-        let instruction_data = input.data;
 
         Ok(Self {
             program_id,
