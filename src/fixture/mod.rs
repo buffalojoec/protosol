@@ -6,7 +6,7 @@ pub mod context;
 pub mod effects;
 pub mod error;
 pub mod feature_set;
-mod proto {
+pub mod proto {
     include!(concat!(env!("OUT_DIR"), "/org.solana.compat.program.rs"));
 }
 pub mod sysvars;

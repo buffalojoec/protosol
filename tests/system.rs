@@ -83,7 +83,7 @@ fn test_transfer() {
         output: output.clone(),
     };
 
-    let resulting_effects = protosol::process_fixture(fixture);
+    let resulting_effects = protosol::process_context(fixture);
     assert_eq!(resulting_effects, output);
 }
 
@@ -141,7 +141,7 @@ fn test_transfer_bad_owner() {
         output: output.clone(),
     };
 
-    let resulting_effects = protosol::process_fixture(fixture);
+    let resulting_effects = protosol::process_context(fixture);
     assert_eq!(resulting_effects, output);
 }
 
@@ -200,7 +200,7 @@ fn test_transfer_sender_not_signer() {
         output: output.clone(),
     };
 
-    let resulting_effects = protosol::process_fixture(fixture);
+    let resulting_effects = protosol::process_context(fixture);
     assert_eq!(resulting_effects, output);
 }
 
@@ -258,6 +258,6 @@ fn test_transfer_sender_not_enough_lamports() {
         output: output.clone(),
     };
 
-    let resulting_effects = protosol::process_fixture(fixture);
+    let resulting_effects = protosol::process_context(fixture);
     assert_eq!(resulting_effects, output);
 }

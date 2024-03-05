@@ -1,13 +1,11 @@
 //! Protobuf fuzzing & testing harness for Solana programs.
 
-#![deny(missing_docs)]
-#![cfg_attr(not(test), forbid(unsafe_code))]
-
+mod compat;
 pub mod fixture;
 mod programs_cache;
 
 use {
-    crate::fixture::{context::FixtureContext, effects::FixtureEffects, Fixture},
+    crate::fixture::{context::FixtureContext, effects::FixtureEffects},
     solana_program_runtime::{
         compute_budget::ComputeBudget, invoke_context::InvokeContext,
         loaded_programs::LoadedProgramsForTxBatch, sysvar_cache::SysvarCache,
@@ -19,12 +17,11 @@ use {
         program_error::ProgramError,
         transaction_context::{InstructionAccount, TransactionContext},
     },
-    std::{collections::HashMap, sync::Arc},
+    std::sync::Arc,
 };
 
-/// Process a fixture using the simulated Solana program runtime.
-pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
-    let Fixture { input, output } = fixture;
+/// Process a cpmtext using the simulated Solana program runtime.
+pub fn process_context(input: FixtureContext) -> FixtureEffects {
     let FixtureContext {
         program_id,
         loader_id: _, // Unused at the moment
@@ -34,10 +31,6 @@ pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
         instruction_accounts: account_metas,
         instruction_data,
     } = input;
-    let FixtureEffects {
-        modified_accounts: expected_modified_accounts,
-        ..
-    } = output;
 
     let compute_budget = ComputeBudget::default();
     let mut compute_units_consumed = 0;
@@ -116,17 +109,12 @@ pub fn process_fixture(fixture: Fixture) -> FixtureEffects {
         }
     };
 
-    let expected_modified_accounts = expected_modified_accounts
-        .into_iter()
-        .collect::<HashMap<_, _>>();
-
     let modified_accounts = transaction_context
         .deconstruct_without_keys()
         .unwrap()
         .into_iter()
         .skip(program_accounts_len)
         .zip(account_metas.iter().map(|meta| meta.pubkey))
-        .filter(|(_, key)| expected_modified_accounts.contains_key(key))
         .map(|(account, key)| (key, account))
         .collect::<Vec<_>>();
 
