@@ -1,6 +1,5 @@
 #!/bin/bash
 
-cargo build-sbf --manifest-path ./test-program/Cargo.toml
-cp -f ./test-program/target/deploy/test_program.so ./tests/test_program.so
 cargo build
-PROGRAM="./tests/test_program.so" cargo +nightly fuzz run agave
+cargo build-sbf --manifest-path ./test-program/Cargo.toml
+PROGRAM="./test-program/target/deploy/test_program.so" cargo +nightly fuzz run agave

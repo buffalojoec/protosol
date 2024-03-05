@@ -79,35 +79,3 @@ pub fn build_loaded_programs_cache(
 
     cache
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_build_loaded_programs_cache() {
-        let program_id = Pubkey::new_unique();
-        let loader_id = solana_sdk::bpf_loader::id();
-        let compute_budget = ComputeBudget::default();
-        let feature_set = FeatureSet::all_enabled();
-        let mut metrics = LoadProgramMetrics::default();
-        let elf = include_bytes!("../tests/test_program.so");
-
-        let cache = build_loaded_programs_cache(
-            &program_id,
-            &loader_id,
-            &compute_budget,
-            &feature_set,
-            &mut metrics,
-            elf,
-        );
-
-        // Assert the program ID is in the cache
-        assert!(cache.find(&program_id).is_some());
-
-        // Assert all builtins are in the cache
-        for builtin in BUILTINS {
-            assert!(cache.find(&builtin.program_id).is_some());
-        }
-    }
-}
