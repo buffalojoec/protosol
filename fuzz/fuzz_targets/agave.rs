@@ -2,7 +2,7 @@
 
 use {
     libfuzzer_sys::fuzz_target,
-    protosol::{fixture::Fixture, program_runtime::process_fixture},
+    protosol::fixture::Fixture,
     std::{env, fs},
 };
 
@@ -12,6 +12,6 @@ fuzz_target!(|data: &[u8]| {
         .expect("Failed to read program ELF file.");
 
     if let Ok(fixture) = Fixture::decode(data) {
-        process_fixture(fixture, &elf);
+        protosol::process_fixture(fixture, &elf);
     }
 });

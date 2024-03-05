@@ -32,7 +32,8 @@ static BUILTINS: &[Builtin] = &[
     /* Additional builtins... */
 ];
 
-/// Build the loaded programs cache with a provided program and the above builtins.
+/// Build the loaded programs cache with a provided program and the above
+/// builtins.
 pub fn build_loaded_programs_cache(
     program_id: &Pubkey,
     loader_id: &Pubkey,
@@ -90,7 +91,7 @@ mod tests {
         let compute_budget = ComputeBudget::default();
         let feature_set = FeatureSet::all_enabled();
         let mut metrics = LoadProgramMetrics::default();
-        let elf = include_bytes!("../../tests/test_program.so");
+        let elf = include_bytes!("../tests/test_program.so");
 
         let cache = build_loaded_programs_cache(
             &program_id,

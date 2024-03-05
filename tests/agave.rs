@@ -81,5 +81,5 @@ fn test_process_instruction_fixture() {
 
     let elf = get_test_elf();
 
-    protosol::program_runtime::process_fixture(fixture, elf);
+    protosol::process_fixture(fixture, elf);
 }
