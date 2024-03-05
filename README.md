@@ -11,7 +11,7 @@ To integration test a Solana program, add `protosol` as a dev-dependency, then
 create some fixtures and run them within test cases using `process_fixture`.
 
 ```
-cargo test-sbf
+cargo test
 ```
 
 To fuzz a Solana program, create one or more fuzz targets similar to the
